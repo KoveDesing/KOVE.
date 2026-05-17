@@ -6,6 +6,7 @@
   <title>KOVE | Premium Branding & Creative Direction</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -539,7 +540,7 @@
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#525252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Entrega rápida (48h)</div>
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#525252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Soporte estándar</div>
         </div>
-        <button class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all">Elegir Plan</button>
+        <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all">Elegir Plan</button>
       </div>
 
       <!-- Premium (highlight) -->
@@ -557,7 +558,7 @@
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Estrategia Visual</div>
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>2 Revisiones</div>
         </div>
-        <button class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white text-black hover:bg-green-400 transition-all">Elegir Plan</button>
+        <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white text-black hover:bg-green-400 transition-all">Elegir Plan</button>
       </div>
 
       <!-- Elite -->
@@ -574,7 +575,7 @@
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#525252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Contenido Elite</div>
           <div class="flex items-center gap-3 text-sm text-neutral-400"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#525252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Soporte 24/7</div>
         </div>
-        <button class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all">Elegir Plan</button>
+        <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" class="w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all">Elegir Plan</button>
       </div>
 
     </div>
@@ -603,32 +604,39 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="flex flex-col gap-2">
           <label class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 ml-4">Nombre</label>
-          <input type="text" placeholder="John Doe" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-white transition-all text-white placeholder-neutral-600" />
+          <input id="contact-name" type="text" placeholder="John Doe" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-white transition-all text-white placeholder-neutral-600" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 ml-4">Email</label>
-          <input type="email" placeholder="john@company.com" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-white transition-all text-white placeholder-neutral-600" />
+          <input id="contact-email" type="email" placeholder="john@company.com" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-white transition-all text-white placeholder-neutral-600" />
         </div>
       </div>
       <div class="flex flex-col gap-2 mb-12">
         <label class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 ml-4">Tu Proyecto</label>
-        <textarea rows="4" placeholder="Cuéntanos un poco sobre tus ideas..." class="bg-white/5 border border-white/10 rounded-3xl p-6 outline-none focus:border-white transition-all resize-none text-white placeholder-neutral-600"></textarea>
+        <textarea id="contact-msg" rows="4" placeholder="Cuéntanos un poco sobre tus ideas..." class="bg-white/5 border border-white/10 rounded-3xl p-6 outline-none focus:border-white transition-all resize-none text-white placeholder-neutral-600"></textarea>
       </div>
-      <button class="w-full py-6 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
-        Enviar Propuesta
+      <button id="contact-submit" onclick="submitContact()" class="w-full py-6 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-3">
+        <span id="contact-btn-text">Enviar Propuesta</span>
+        <svg id="contact-spinner" class="hidden animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
       </button>
+      <div id="contact-success" class="hidden mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-2xl text-center text-green-400 text-sm font-bold">
+        ✅ ¡Mensaje enviado! Te contactaremos pronto.
+      </div>
+      <div id="contact-error" class="hidden mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-center text-red-400 text-sm font-bold">
+        ❌ Error al enviar. Escríbenos directamente por WhatsApp.
+      </div>
 
       <div class="mt-12 pt-12 border-t border-white/5 flex flex-wrap justify-center gap-8">
-        <a href="#" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
+        <a href="https://instagram.com/kovestudio" target="_blank" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
           Instagram
         </a>
-        <a href="mailto:kove@design.com" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
+        <a href="mailto:kovedesign2026@gmail.com" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           Email
         </a>
-        <a href="#" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <a href="https://wa.me/573152507850" target="_blank" class="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           WhatsApp
         </a>
       </div>
@@ -724,64 +732,161 @@
 
   <!-- ====== SCRIPTS ====== -->
   <script>
-    // --- Navbar scroll ---
+    // ================================================================
+    // NAVBAR SCROLL
+    // ================================================================
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) navbar.classList.add('scrolled');
-      else navbar.classList.remove('scrolled');
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
     });
 
-    // --- Mobile menu ---
+    // ================================================================
+    // MOBILE MENU — cierra al hacer click afuera
+    // ================================================================
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    const iconMenu = document.getElementById('icon-menu');
-    const iconX = document.getElementById('icon-x');
+    const iconMenu  = document.getElementById('icon-menu');
+    const iconX     = document.getElementById('icon-x');
     let menuOpen = false;
-    menuToggle.addEventListener('click', () => {
+
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
       menuOpen = !menuOpen;
       mobileMenu.classList.toggle('open', menuOpen);
-      iconMenu.style.display = menuOpen ? 'none' : 'block';
-      iconX.style.display = menuOpen ? 'block' : 'none';
+      iconMenu.style.display = menuOpen ? 'none'  : 'block';
+      iconX.style.display    = menuOpen ? 'block' : 'none';
     });
+
+    document.addEventListener('click', (e) => {
+      if (menuOpen && !mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        closeMobile();
+      }
+    });
+
     function closeMobile() {
       menuOpen = false;
       mobileMenu.classList.remove('open');
       iconMenu.style.display = 'block';
-      iconX.style.display = 'none';
+      iconX.style.display    = 'none';
     }
 
-    // --- Scroll reveal ---
-    const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-scale');
+    // ================================================================
+    // SCROLL REVEAL
+    // ================================================================
     const revealObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); }
-      });
-    }, { threshold: 0.12 });
-    revealEls.forEach(el => revealObs.observe(el));
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => revealObs.observe(el));
 
-    // --- AI Chat ---
-    const chatToggle = document.getElementById('chat-toggle');
-    const chatbox = document.getElementById('chatbox');
-    const chatIconOpen = document.getElementById('chat-icon-open');
+    // ================================================================
+    // EMAILJS — Formulario de contacto
+    // Configuración: necesitas crear cuenta gratis en emailjs.com
+    // y reemplazar los 3 valores de abajo con los tuyos.
+    // Guía rápida al final del script.
+    // ================================================================
+    const EMAILJS_PUBLIC_KEY  = 'TU_PUBLIC_KEY';   // <-- reemplaza
+    const EMAILJS_SERVICE_ID  = 'TU_SERVICE_ID';   // <-- reemplaza
+    const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID';  // <-- reemplaza
+    const WA_NUMBER = '573152507850';
+    const GMAIL     = 'kovedesign2026@gmail.com';
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    async function submitContact() {
+      const name    = document.getElementById('contact-name').value.trim();
+      const email   = document.getElementById('contact-email').value.trim();
+      const message = document.getElementById('contact-msg').value.trim();
+
+      if (!name || !email || !message) {
+        alert('Por favor completa todos los campos.'); return;
+      }
+
+      const btn     = document.getElementById('contact-submit');
+      const btnText = document.getElementById('contact-btn-text');
+      const spinner = document.getElementById('contact-spinner');
+      const success = document.getElementById('contact-success');
+      const error   = document.getElementById('contact-error');
+
+      btn.disabled = true;
+      btnText.textContent = 'Enviando...';
+      spinner.classList.remove('hidden');
+      success.classList.add('hidden');
+      error.classList.add('hidden');
+
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          from_name: name,
+          from_email: email,
+          message: message,
+          to_email: GMAIL,
+        });
+
+        // También abre WhatsApp con el mensaje
+        const waMsg = encodeURIComponent(`¡Hola KOVE! Soy ${name} (${email}).\n\n${message}`);
+        window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, '_blank');
+
+        success.classList.remove('hidden');
+        document.getElementById('contact-name').value  = '';
+        document.getElementById('contact-email').value = '';
+        document.getElementById('contact-msg').value   = '';
+      } catch (err) {
+        console.error('EmailJS error:', err);
+        // Fallback: abre WhatsApp directamente
+        const waMsg = encodeURIComponent(`¡Hola KOVE! Soy ${name} (${email}).\n\n${message}`);
+        window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, '_blank');
+        error.classList.remove('hidden');
+      }
+
+      btn.disabled = false;
+      btnText.textContent = 'Enviar Propuesta';
+      spinner.classList.add('hidden');
+    }
+
+    // ================================================================
+    // CHAT IA — Conectado a Claude API (Anthropic)
+    // NOTA: Para seguridad en producción, mueve el llamado al API
+    // a un backend tuyo. Aquí funciona directo desde el browser
+    // si tienes una API key válida.
+    // ================================================================
+    const CLAUDE_API_KEY = 'TU_ANTHROPIC_API_KEY'; // <-- reemplaza con tu key
+
+    const SYSTEM_PROMPT = `Eres el asistente virtual de KOVE Studio, un estudio de diseño gráfico premium. 
+Tu nombre es KOVE IA. Eres amable, profesional, creativo y conciso.
+Ayudas a los visitantes a entender los servicios de KOVE, orientarlos sobre precios y agendar proyectos.
+
+Servicios de KOVE:
+- Diseño Gráfico (identidad visual, branding, comunicación)
+- Edición de Video (profesional, stories, contenido)
+- Motion Graphics (animación, efectos visuales)
+- Branding Completo (identidad, logotipos, sistemas visuales)
+- E-Commerce y Dropshipping (diseño para ventas)
+- Dirección Creativa
+
+Planes:
+- Starter: $299 — 2 piezas gráficas, entrega 48h
+- Premium: $799 — branding completo, motion graphics, estrategia visual
+- Elite: $1,499 — dirección creativa, gestión mensual, soporte 24/7
+
+Contacto: kovedesign2026@gmail.com | WhatsApp: +57 315 250 7850
+Instagram/Behance/TikTok: @kovestudio
+
+Responde siempre en español, máximo 3 oraciones por respuesta. Si el cliente quiere cotizar o hablar, invítalo a contactar por WhatsApp.`;
+
+    const chatHistory = [];
+
+    const chatToggle    = document.getElementById('chat-toggle');
+    const chatbox       = document.getElementById('chatbox');
+    const chatIconOpen  = document.getElementById('chat-icon-open');
     const chatIconClose = document.getElementById('chat-icon-close');
-    const chatInput = document.getElementById('chat-input');
-    const chatSend = document.getElementById('chat-send');
-    const chatMessages = document.getElementById('chat-messages');
-
-    const aiResponses = [
-      '¡Perfecto! Podemos crear una identidad visual increíble para tu marca. ¿Tienes referencias o un estilo en mente?',
-      '¡Entendido! Te recomiendo explorar nuestro plan Premium para un resultado de alto impacto.',
-      'En KOVE cada detalle importa. Cuéntanos más sobre tu visión y la haremos realidad.',
-      '¡Claro! Nuestro equipo está disponible para iniciar tu proyecto esta misma semana.',
-      'Nuestro portafolio habla por sí solo. ¿Te gustaría ver ejemplos similares a tu industria?'
-    ];
-    let aiIdx = 0;
+    const chatInput     = document.getElementById('chat-input');
+    const chatSend      = document.getElementById('chat-send');
+    const chatMessages  = document.getElementById('chat-messages');
 
     let chatOpen = false;
     chatToggle.addEventListener('click', () => {
       chatOpen = !chatOpen;
       chatbox.classList.toggle('open', chatOpen);
-      chatIconOpen.style.display = chatOpen ? 'none' : 'block';
+      chatIconOpen.style.display  = chatOpen ? 'none'  : 'block';
       chatIconClose.style.display = chatOpen ? 'block' : 'none';
     });
 
@@ -791,26 +896,104 @@
         (role === 'ai'
           ? 'bg-white/5 text-neutral-300 self-start'
           : 'bg-white text-black self-end font-medium');
-      if (role === 'ai') div.style.borderTopLeftRadius = '4px';
-      else div.style.borderTopRightRadius = '4px';
+      div.style[role === 'ai' ? 'borderTopLeftRadius' : 'borderTopRightRadius'] = '4px';
       div.textContent = text;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return div;
+    }
+
+    function addTyping() {
+      const div = document.createElement('div');
+      div.id = 'typing-indicator';
+      div.className = 'max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 text-neutral-400 self-start flex gap-1 items-center';
+      div.style.borderTopLeftRadius = '4px';
+      div.innerHTML = '<span class="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style="animation-delay:0s"></span><span class="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style="animation-delay:0.15s"></span><span class="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style="animation-delay:0.3s"></span>';
       chatMessages.appendChild(div);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       const val = chatInput.value.trim();
-      if (!val) return;
+      if (!val || chatInput.disabled) return;
+
       addMessage(val, 'user');
+      chatHistory.push({ role: 'user', content: val });
       chatInput.value = '';
-      setTimeout(() => {
-        addMessage(aiResponses[aiIdx % aiResponses.length], 'ai');
-        aiIdx++;
-      }, 900);
+      chatInput.disabled = true;
+      chatSend.disabled  = true;
+      addTyping();
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 300,
+            system: SYSTEM_PROMPT,
+            messages: chatHistory
+          })
+        });
+
+        const data = await res.json();
+        document.getElementById('typing-indicator')?.remove();
+
+        const reply = data?.content?.[0]?.text || '¡Ups! Algo salió mal. Contáctanos por WhatsApp: wa.me/573152507850';
+        chatHistory.push({ role: 'assistant', content: reply });
+        addMessage(reply, 'ai');
+
+        // Si menciona WhatsApp en la respuesta, mostrar botón rápido
+        if (reply.toLowerCase().includes('whatsapp')) {
+          const btn = document.createElement('a');
+          btn.href = 'https://wa.me/573152507850';
+          btn.target = '_blank';
+          btn.className = 'self-start mt-1 px-4 py-2 bg-green-500 text-black text-xs font-black rounded-full hover:bg-green-400 transition-all';
+          btn.textContent = '💬 Abrir WhatsApp';
+          chatMessages.appendChild(btn);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+      } catch (err) {
+        document.getElementById('typing-indicator')?.remove();
+        addMessage('Lo siento, tuve un problema técnico. Puedes contactarnos en kovedesign2026@gmail.com o por WhatsApp.', 'ai');
+      }
+
+      chatInput.disabled = false;
+      chatSend.disabled  = false;
+      chatInput.focus();
     }
 
     chatSend.addEventListener('click', sendMessage);
     chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+    /*
+    ================================================================
+    INSTRUCCIONES PARA ACTIVAR EL FORMULARIO (EmailJS):
+    ================================================================
+    1. Ve a https://www.emailjs.com y crea cuenta gratis
+    2. Crea un "Email Service" (Gmail) y copia el Service ID
+    3. Crea un "Email Template" con variables:
+       {{from_name}}, {{from_email}}, {{message}}
+       Copia el Template ID
+    4. En "Account" copia tu Public Key
+    5. Reemplaza los 3 valores arriba:
+       EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID
+
+    INSTRUCCIONES PARA LA IA (Claude API):
+    ================================================================
+    1. Ve a https://console.anthropic.com
+    2. Crea una API Key
+    3. Reemplaza CLAUDE_API_KEY arriba con tu key
+    4. IMPORTANTE: En producción con dominio propio funciona directo.
+       Para pruebas locales puede necesitar un proxy.
+    ================================================================
+    */
   </script>
 </body>
 </html>
