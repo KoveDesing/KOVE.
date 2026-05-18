@@ -800,7 +800,7 @@
       // EmailJS (backup si n8n falla)
       emailjs_public_key:  'Feogxi8oYOrXTVu8_',
       emailjs_service_id:  'service_8g6v4m6',
-      emailjs_template_id: 'template_kove_lead',
+      emailjs_template_id: 'template_ek9msdk',
 
       // Tus datos
       gmail:      'kovedesign2026@gmail.com',
@@ -950,12 +950,23 @@ ${msg}
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(leadPayload),
-            mode: 'no-cors' // n8n acepta sin CORS headers adicionales
           });
-          // no-cors siempre da opaque response — asumimos éxito si no hay error
           n8nOk = true;
+          console.log('✅ n8n webhook OK:', res.status);
         } catch (err) {
-          console.warn('n8n webhook error:', err);
+          // Si CORS bloquea, intentar con text/plain (n8n lo acepta igual)
+          try {
+            await fetch(CONFIG.webhook_url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: JSON.stringify(leadPayload),
+              mode: 'no-cors',
+            });
+            n8nOk = true;
+            console.log('✅ n8n webhook OK (fallback)');
+          } catch (err2) {
+            console.warn('❌ n8n webhook error:', err2);
+          }
         }
       }
 
