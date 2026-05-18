@@ -794,17 +794,27 @@
   <!-- ====== SCRIPTS ====== -->
   <script>
     // ================================================================
-    // CONFIGURACIÓN CENTRAL
+    // CONFIGURACIÓN KOVE — Todo listo, solo pega tu webhook URL de n8n
     // ================================================================
     const CONFIG = {
-      emailjs_public_key:  'XtWp_iMX4vvqhItKL',
+      // EmailJS (backup si n8n falla)
+      emailjs_public_key:  'Feogxi8oYOrXTVu8_',
       emailjs_service_id:  'service_8g6v4m6',
       emailjs_template_id: 'template_kove_lead',
+
+      // Tus datos
       gmail:      'kovedesign2026@gmail.com',
       wa_number:  '573152507850',
-      webhook_url: '',  // pega aquí tu URL de n8n cuando lo configures
+
+      // ⬇ PEGA AQUÍ TU URL DE N8N (la del nodo Webhook → Production URL)
+      webhook_url: 'https://kovedesing.app.n8n.cloud/webhook/kove-leads',
+      //  Webhook n8n — producción
+
+      // Google Sheet ID (ya configurado)
+      sheet_id: '1G1BdnxKCCxjfrnWToP9zuGpLxZdvh8pn1pm7pPmmZwU',
     };
 
+    // Init EmailJS
     emailjs.init(CONFIG.emailjs_public_key);
 
     // ================================================================
@@ -814,7 +824,7 @@
     window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
 
     // ================================================================
-    // MOBILE MENU — cierra al hacer click afuera
+    // MOBILE MENU
     // ================================================================
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -848,12 +858,12 @@
     document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => revealObs.observe(el));
 
     // ================================================================
-    // SUBMIT CONTACT — Flujo completo de captura de lead
+    // SUBMIT CONTACTO — Flujo completo
     // 1. Valida campos
-    // 2. Envía email a kovedesign2026@gmail.com via EmailJS
-    // 3. Si hay webhook n8n → guarda en Google Sheets
-    // 4. Genera link WhatsApp prellenado con datos del cliente
-    // 5. Muestra confirmación + abre WhatsApp automáticamente
+    // 2. Envía a webhook n8n → guarda en Google Sheets + emails automáticos
+    // 3. Backup: EmailJS directo a tu Gmail si n8n falla
+    // 4. Abre WhatsApp con datos del cliente prellenados
+    // 5. Muestra confirmación con botón WhatsApp
     // ================================================================
     async function submitContact() {
       const name    = document.getElementById('contact-name').value.trim();
@@ -862,15 +872,25 @@
       const service = document.getElementById('contact-service').value;
       const msg     = document.getElementById('contact-msg').value.trim();
 
-      // Validación con highlight visual
+      // Validación visual
       let valid = true;
       [['contact-name', name], ['contact-email', email], ['contact-wa', wa], ['contact-msg', msg]].forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!val) { el.style.borderColor = '#ef4444'; valid = false; }
         else el.style.borderColor = '';
       });
-      if (!valid) return;
-      if (!email.includes('@')) { document.getElementById('contact-email').style.borderColor = '#ef4444'; return; }
+      if (!valid) { 
+        // Shake animation
+        const btn = document.getElementById('contact-submit');
+        btn.style.transform = 'translateX(-8px)';
+        setTimeout(() => btn.style.transform = 'translateX(8px)', 100);
+        setTimeout(() => btn.style.transform = '', 200);
+        return; 
+      }
+      if (!email.includes('@')) { 
+        document.getElementById('contact-email').style.borderColor = '#ef4444'; 
+        return; 
+      }
 
       const btn     = document.getElementById('contact-submit');
       const btnText = document.getElementById('contact-btn-text');
@@ -879,27 +899,67 @@
       const error   = document.getElementById('contact-error');
 
       btn.disabled = true;
-      btnText.textContent = 'Procesando...';
+      btnText.textContent = 'Enviando...';
       spinner.classList.remove('hidden');
       success.classList.add('hidden');
       error.classList.add('hidden');
 
       const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
 
-      // Mensaje WhatsApp prellenado con datos reales del cliente
+      // Payload con todos los datos del lead
+      const leadPayload = {
+        name:     name,
+        email:    email,
+        whatsapp: wa,
+        service:  service || 'No especificado',
+        message:  msg,
+        fecha:    fecha,
+        source:   'Web KOVE — kove-pied.vercel.app',
+        sheet_id: CONFIG.sheet_id,
+      };
+
+      // Mensaje WhatsApp prellenado con datos reales
       const waText = encodeURIComponent(
-        `Hola KOVE! Soy *${name}*\n\n` +
-        `Email: ${email}\n` +
-        `WhatsApp: +57${wa}\n` +
-        `Servicio: ${service || 'No especificado'}\n\n` +
-        `Proyecto:\n${msg}\n\n` +
-        `_Enviado desde kove-pied.vercel.app_`
+        `Hola KOVE! Soy *${name}*
+
+` +
+        `📧 Email: ${email}
+` +
+        `📱 WhatsApp: +57${wa}
+` +
+        `🎯 Servicio: ${service || 'No especificado'}
+
+` +
+        `💬 Proyecto:
+${msg}
+
+` +
+        `_Web: kove-pied.vercel.app_`
       );
       const waLink = `https://wa.me/${CONFIG.wa_number}?text=${waText}`;
+      document.getElementById('wa-followup-link').href = waLink;
 
+      let n8nOk = false;
       let emailOk = false;
 
-      // Paso 2: Email via EmailJS
+      // ── INTENTO 1: n8n Webhook (Google Sheets + Emails automáticos) ──
+      const webhookActivo = CONFIG.webhook_url && !CONFIG.webhook_url.includes('PEGA_TU');
+      if (webhookActivo) {
+        try {
+          const res = await fetch(CONFIG.webhook_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(leadPayload),
+            mode: 'no-cors' // n8n acepta sin CORS headers adicionales
+          });
+          // no-cors siempre da opaque response — asumimos éxito si no hay error
+          n8nOk = true;
+        } catch (err) {
+          console.warn('n8n webhook error:', err);
+        }
+      }
+
+      // ── INTENTO 2: EmailJS (backup directo a Gmail) ──
       try {
         await emailjs.send(CONFIG.emailjs_service_id, CONFIG.emailjs_template_id, {
           to_email:   CONFIG.gmail,
@@ -913,36 +973,29 @@
         });
         emailOk = true;
       } catch (err) {
-        console.warn('EmailJS:', err);
+        console.warn('EmailJS error:', err);
       }
 
-      // Paso 3: Webhook n8n / Google Sheets
-      if (CONFIG.webhook_url) {
-        try {
-          await fetch(CONFIG.webhook_url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, whatsapp: '+57'+wa, service: service||'No especificado', message: msg, fecha, source: 'Web KOVE' }),
-            mode: 'no-cors'
-          });
-        } catch (err) { console.warn('Webhook:', err); }
-      }
-
-      // Paso 4 y 5: Feedback + WhatsApp
-      document.getElementById('wa-followup-link').href = waLink;
-
-      if (emailOk || !CONFIG.emailjs_public_key.includes('TU_')) {
+      // ── RESULTADO ──
+      if (n8nOk || emailOk) {
+        // Éxito — limpiar form
         success.classList.remove('hidden');
+        ['contact-name','contact-email','contact-wa','contact-msg'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('contact-service').value = '';
+
+        // Log en consola para debug
+        console.log('✅ Lead enviado:', { n8n: n8nOk, emailjs: emailOk, lead: name });
+
+        // Abre WhatsApp después de 1.5s con datos del cliente
+        setTimeout(() => window.open(waLink, '_blank'), 1500);
+
       } else {
+        // Fallback total — WhatsApp directo (el lead NO se pierde)
         error.classList.remove('hidden');
+        window.open(waLink, '_blank');
       }
-
-      // Limpiar form
-      ['contact-name','contact-email','contact-wa','contact-msg'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('contact-service').value = '';
-
-      // Abre WhatsApp automáticamente con los datos prellenados
-      setTimeout(() => window.open(waLink, '_blank'), 1500);
 
       btn.disabled = false;
       btnText.textContent = 'Enviar & Recibir Propuesta';
@@ -950,27 +1003,57 @@
     }
 
     // ================================================================
-    // CHAT IA — Claude API
-    // Para activar: reemplaza con tu key de console.anthropic.com
-    // Sin key → usa respuestas inteligentes predefinidas (igual capta leads)
+    // CHAT IA — Respuestas inteligentes sin API de pago
+    // Usa respuestas predefinidas que suenan naturales
+    // y siempre captura el lead hacia WhatsApp
     // ================================================================
-    const CLAUDE_API_KEY = 'TU_ANTHROPIC_API_KEY';
+    const chatResponses = {
+      precio: [
+        '¡Hola! Tenemos 3 planes: Starter $299 (2 piezas, 48h), Premium $799 (branding completo + motion) y Elite $1,499 (dirección creativa mensual). ¿Cuál se ajusta a tu proyecto?',
+        'Depende del alcance de tu proyecto. El más popular es el Premium ($799) que incluye branding completo, motion graphics y 2 rondas de revisión. ¿Te interesa?',
+      ],
+      branding: [
+        '¡El branding es nuestra especialidad! Creamos identidades visuales completas: logo, paleta de colores, tipografías y manual de marca. ¿Tienes una marca nueva o quieres renovar una existente?',
+        'Para branding completo te recomiendo el plan Premium. Incluye logo, sistema de colores, tipografías, aplicaciones y guía de uso. ¿Cuándo necesitas tenerlo listo?',
+      ],
+      video: [
+        '¡Hacemos edición de video profesional! Reels, stories, videos de marca, motion graphics. ¿Para qué plataforma es el contenido?',
+        'La edición de video es clave para el algoritmo hoy en día. Creamos contenido que retiene atención y convierte. ¿Cuántos videos necesitas al mes?',
+      ],
+      logo: [
+        '¡Claro! Diseñamos logos con concepto, no solo estética. El proceso incluye investigación, propuestas, revisiones y entrega en todos los formatos. ¿Qué tipo de negocio tienes?',
+        'Un buen logo es la base de todo. Te entregamos el diseño en SVG, PNG y PDF listos para usar en digital e impresión. ¿Ya tienes referencias de estilos que te gusten?',
+      ],
+      tiempo: [
+        'Los tiempos varían según el proyecto. Diseño rápido: 48h. Branding completo: 5-7 días. Motion graphics: 3-5 días. ¿Tienes alguna fecha límite?',
+        'Podemos arrancar esta misma semana. ¿Cuál es tu deadline? Ajustamos el proceso para que llegues a tiempo.',
+      ],
+      default: [
+        '¡Hola! Soy el asistente de KOVE Studio. Diseño gráfico, branding y motion graphics premium. ¿En qué puedo ayudarte hoy? 🎨',
+        'En KOVE cada detalle importa. ¿Tienes un proyecto en mente? Cuéntame y te digo cómo podemos ayudarte.',
+        '¡Perfecto! Para darte una propuesta personalizada, lo mejor es hablar directo. ¿Te escribimos por WhatsApp?',
+        'Trabajamos con marcas de gastronomía, moda, música, tecnología y más. ¿Cuál es tu industria?',
+        'Podemos iniciar tu proyecto esta semana. Escríbenos al +57 315 250 7850 🚀',
+      ]
+    };
 
-    const SYSTEM_PROMPT = `Eres KOVE IA, asistente del estudio de diseño gráfico premium KOVE Studio.
-Eres profesional, creativo, conciso y orientado a ventas. Tu objetivo: convertir visitantes en clientes.
+    function getAIResponse(userMsg) {
+      const msg = userMsg.toLowerCase();
+      if (msg.includes('precio') || msg.includes('costo') || msg.includes('cuánto') || msg.includes('cuanto') || msg.includes('plan') || msg.includes('valor'))
+        return chatResponses.precio[Math.floor(Math.random()*chatResponses.precio.length)];
+      if (msg.includes('brand') || msg.includes('identidad') || msg.includes('marca'))
+        return chatResponses.branding[Math.floor(Math.random()*chatResponses.branding.length)];
+      if (msg.includes('video') || msg.includes('reel') || msg.includes('motion') || msg.includes('animaci'))
+        return chatResponses.video[Math.floor(Math.random()*chatResponses.video.length)];
+      if (msg.includes('logo') || msg.includes('diseño') || msg.includes('diseno'))
+        return chatResponses.logo[Math.floor(Math.random()*chatResponses.logo.length)];
+      if (msg.includes('tiempo') || msg.includes('cuándo') || msg.includes('cuando') || msg.includes('rápido') || msg.includes('urgente') || msg.includes('plazo'))
+        return chatResponses.tiempo[Math.floor(Math.random()*chatResponses.tiempo.length)];
+      // Default rotativo
+      const defs = chatResponses.default;
+      return defs[Math.floor(Math.random()*defs.length)];
+    }
 
-SERVICIOS: Diseño Gráfico, Edición de Video, Motion Graphics, Branding, E-Commerce, Dirección Creativa.
-
-PLANES:
-- Starter $299: 2 piezas, entrega 48h
-- Premium $799: Branding completo + motion + estrategia + 2 revisiones
-- Elite $1,499: Dirección creativa + gestión mensual + soporte 24/7
-
-CONTACTO: kovedesign2026@gmail.com | WhatsApp: +57 315 250 7850 | @kovestudio
-
-REGLAS: Responde en español. Máximo 2-3 oraciones. Si hay interés real, invita a llenar el formulario o escribir por WhatsApp.`;
-
-    const chatHistory = [];
     const chatToggle    = document.getElementById('chat-toggle');
     const chatbox       = document.getElementById('chatbox');
     const chatIconOpen  = document.getElementById('chat-icon-open');
@@ -979,6 +1062,7 @@ REGLAS: Responde en español. Máximo 2-3 oraciones. Si hay interés real, invit
     const chatSend      = document.getElementById('chat-send');
     const chatMessages  = document.getElementById('chat-messages');
     let chatOpen = false;
+    let msgCount = 0;
 
     chatToggle.addEventListener('click', () => {
       chatOpen = !chatOpen;
@@ -998,126 +1082,66 @@ REGLAS: Responde en español. Máximo 2-3 oraciones. Si hay interés real, invit
     }
 
     function addTypingDots() {
-      if (!document.getElementById('bounce-style')) {
+      if (!document.getElementById('bounce-kove')) {
         const s = document.createElement('style');
-        s.id = 'bounce-style';
-        s.textContent = '@keyframes chatBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}';
+        s.id = 'bounce-kove';
+        s.textContent = '@keyframes kBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}';
         document.head.appendChild(s);
       }
       const div = document.createElement('div');
       div.id = 'typing-indicator';
       div.className = 'max-w-[88%] px-5 py-4 rounded-2xl bg-white/5 self-start flex gap-1.5 items-center';
       div.style.borderTopLeftRadius = '4px';
-      div.innerHTML = [0, 0.15, 0.3].map(d =>
-        `<span style="width:8px;height:8px;background:#525252;border-radius:50%;display:inline-block;animation:chatBounce 1s ${d}s infinite"></span>`
+      div.innerHTML = [0,.15,.3].map(d =>
+        `<span style="width:8px;height:8px;background:#525252;border-radius:50%;display:inline-block;animation:kBounce 1s ${d}s infinite"></span>`
       ).join('');
       chatMessages.appendChild(div);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    const fallbackResponses = [
-      'Hola! Soy KOVE IA. Diseñamos identidades visuales de alto impacto. ¿En qué te puedo ayudar? 🎨',
-      'Nuestro plan Premium ($799) incluye branding completo, motion graphics y estrategia visual. ¿Quieres más detalles?',
-      'Para tu proyecto lo ideal es hablar directamente. ¿Te escribo por WhatsApp o prefieres llenar el formulario?',
-      'En KOVE cada detalle importa. Cuéntame sobre tu marca y qué quieres lograr con el diseño.',
-      'Podemos iniciar tu proyecto esta semana. Escríbenos al +57 315 250 7850 y agendamos una llamada gratis 🚀',
-      'Trabajamos con marcas de todos los sectores: gastronomía, moda, música, tecnología y más. ¿Cuál es tu nicho?',
-    ];
-    let fallbackIdx = 0;
+    function addWAButton() {
+      if (document.getElementById('chat-wa-btn')) return;
+      const a = document.createElement('a');
+      a.id = 'chat-wa-btn';
+      a.href = 'https://wa.me/573152507850?text=Hola%20KOVE!%20Quiero%20informaci%C3%B3n%20sobre%20sus%20servicios%20de%20dise%C3%B1o%20%F0%9F%8E%A8';
+      a.target = '_blank';
+      a.className = 'self-start mt-1 px-5 py-2.5 bg-green-500 text-black text-xs font-black rounded-full hover:bg-green-400 transition-all flex items-center gap-2';
+      a.innerHTML = `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Hablar por WhatsApp`;
+      chatMessages.appendChild(a);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
-    async function sendMessage() {
+    function sendMessage() {
       const val = chatInput.value.trim();
       if (!val || chatInput.disabled) return;
 
       addMessage(val, 'user');
-      chatHistory.push({ role: 'user', content: val });
       chatInput.value    = '';
       chatInput.disabled = true;
       chatSend.disabled  = true;
+      msgCount++;
       addTypingDots();
 
-      const useAPI = CLAUDE_API_KEY && CLAUDE_API_KEY !== 'TU_ANTHROPIC_API_KEY';
+      // Simula tiempo de respuesta natural (0.8s - 1.6s)
+      const delay = 800 + Math.random() * 800;
 
-      if (!useAPI) {
-        setTimeout(() => {
-          document.getElementById('typing-indicator')?.remove();
-          const reply = fallbackResponses[fallbackIdx % fallbackResponses.length];
-          fallbackIdx++;
-          addMessage(reply, 'ai');
-          if (fallbackIdx >= 3) addWAButton();
-          chatInput.disabled = false;
-          chatSend.disabled  = false;
-        }, 1200);
-        return;
-      }
-
-      try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': CLAUDE_API_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 250,
-            system: SYSTEM_PROMPT,
-            messages: chatHistory
-          })
-        });
-        const data  = await res.json();
-        const reply = data?.content?.[0]?.text || fallbackResponses[0];
-        chatHistory.push({ role: 'assistant', content: reply });
+      setTimeout(() => {
         document.getElementById('typing-indicator')?.remove();
+        const reply = getAIResponse(val);
         addMessage(reply, 'ai');
-        if (reply.toLowerCase().includes('whatsapp') || chatHistory.length >= 6) addWAButton();
-      } catch {
-        document.getElementById('typing-indicator')?.remove();
-        addMessage(fallbackResponses[fallbackIdx % fallbackResponses.length], 'ai');
-        fallbackIdx++;
-      }
 
-      chatInput.disabled = false;
-      chatSend.disabled  = false;
-      chatInput.focus();
-    }
+        // Después del 2do mensaje siempre muestra botón WhatsApp
+        if (msgCount >= 2) addWAButton();
 
-    function addWAButton() {
-      if (document.getElementById('chat-wa-btn')) return;
-      const a = document.createElement('a');
-      a.id        = 'chat-wa-btn';
-      a.href      = 'https://wa.me/573152507850?text=Hola%20KOVE!%20Quiero%20informaci%C3%B3n%20sobre%20sus%20servicios';
-      a.target    = '_blank';
-      a.className = 'self-start mt-1 px-5 py-2.5 bg-green-500 text-black text-xs font-black rounded-full hover:bg-green-400 transition-all flex items-center gap-2';
-      a.innerHTML = '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Hablar por WhatsApp';
-      chatMessages.appendChild(a);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatInput.disabled = false;
+        chatSend.disabled  = false;
+        chatInput.focus();
+      }, delay);
     }
 
     chatSend.addEventListener('click', sendMessage);
     chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
-    /*
-    ╔══════════════════════════════════════════════════════╗
-    ║  ACTIVAR EMAILJS (formulario → Gmail):              ║
-    ║  1. emailjs.com → Add Service → Gmail               ║
-    ║     Service ID: service_8g6v4m6 (ya lo tienes)      ║
-    ║  2. Email Templates → Create → ID: template_kove_lead ║
-    ║     Variables: {{from_name}} {{from_email}}          ║
-    ║     {{client_wa}} {{service}} {{message}} {{fecha}}  ║
-    ║  3. Account → Public Key → pega en CONFIG arriba     ║
-    ║                                                      ║
-    ║  ACTIVAR N8N + GOOGLE SHEETS (base de leads):       ║
-    ║  1. n8n: Webhook → Google Sheets (Append Row)        ║
-    ║  2. Copia URL webhook → CONFIG.webhook_url           ║
-    ║                                                      ║
-    ║  ACTIVAR IA REAL (Claude):                          ║
-    ║  1. console.anthropic.com → API Keys                 ║
-    ║  2. Pega en CLAUDE_API_KEY arriba                    ║
-    ╚══════════════════════════════════════════════════════╝
-    */
   </script>
 </body>
 </html>
